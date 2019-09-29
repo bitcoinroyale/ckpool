@@ -1,4 +1,10 @@
-CKPOOL + CKDB + libckpool by Con Kolivas and Andrew Smith.
+# CKPOOL for Bitcoin Royale
+
+This is a fork of Bitcoin's [CKPOOL](https://bitbucket.org/ckolivas/ckpool) with minor modifications to adapt it to Bitcoin Royale.
+
+---
+
+## CKPOOL + CKDB + libckpool by Con Kolivas and Andrew Smith
 
 Ultra low overhead massively scalable multi-process, multi-threaded modular
 bitcoin mining pool, proxy, passthrough, library and database interface in c
@@ -10,16 +16,13 @@ is mostly paid for by commissioned funding, and the pool by default contributes
 this contribution in the code if you are running it on a pool or contributing to the
 authors listed in AUTHORS if you use this code to aid funding further development.
 
----
-LICENSE:
+### LICENSE
 
 GNU Public license V3. See included COPYING for details.
 
+### DESIGN
 
----
-DESIGN:
-
-Architecture:
+#### Architecture
 - Low level hand coded architecture relying on minimal outside libraries beyond
 basic glibc functions for maximum flexibility and minimal overhead that can be
 built and deployed on any Linux installation.
@@ -33,7 +36,7 @@ processes.
 - Same code can be deployed in many different modes designed to talk to each
 other on the same machine, local lan or remote internet locations.
 
-Modes of deployment:
+#### Modes of deployment
 - Comprehensive pooled mining solution with a postgresql database interface.
 - Passthrough node(s) that combine connections to a single socket which can
 be used to scale to millions of clients and allow the main pool to be isolated
@@ -45,8 +48,8 @@ solutions when talking to ckpool.
 - Simple pool without a database.
 - Library for use by other software.
 
-Features:
-- Bitcoind communication to unmodified bitcoind with multiple failover to local
+#### Features
+- Broyaled communication to unmodified broyaled with multiple failover to local
 or remote locations.
 - Local pool instance worker limited only by operating system resources and
 can be made virtually limitless through use of multiple downstream passthrough
@@ -58,7 +61,7 @@ instances to new starting instance.
 - Configurable custom coinbase signature.
 - Configurable instant starting and minimum difficulty.
 - Rapid vardiff adjustment with stable unlimited maximum difficulty handling.
-- New work generation on block changes incorporate full bitcoind transaction
+- New work generation on block changes incorporate full broyaled transaction
 set without delay or requiring to send transactionless work to miners thereby
 providing the best bitcoin network support and rewarding miners with the most
 transaction fees.
@@ -68,44 +71,48 @@ slow communicating clients from delaying low latency ones.
 - Accurate pool and per client statistics.
 - Multiple named instances can be run concurrently on the same machine.
 
-
----
-BUILDING:
+### BUILDING
 
 Building ckpool standalone without ckdb has no dependencies outside of the
 basic build tools on any linux installation.
 
+```
 sudo apt-get install build-essential yasm
 ./configure --without-ckdb
 make
-
+```
 
 Building with ckdb requires installation of the postgresql, gsl and ssl
 development libraries.
 
+```
 sudo apt-get install build-essential yasm libpq-dev libgsl-dev
 ./configure
 make
+```
 
 older distributions may instead require a different version of gsl:
- sudo apt-get install build-essential libpq-dev libgsl0ldbl libgsl0-dev yasm
+```
+sudo apt-get install build-essential libpq-dev libgsl0ldbl libgsl0-dev yasm
+```
 
 N.B. ckdb also requires libssl-dev but libpq-dev depends on it and installs it
 
 
 Building from git also requires autoconf and automake
 
+```
 sudo apt-get install build-essential yasm libpq-dev libgsl-dev autoconf automake libtool
 ./autogen.sh
 ./configure
 make
-
+```
 
 Binaries will be built in the src/ subdirectory. Binaries generated will be:
-ckpool - The main pool back end
-ckdb - The pool's database
-ckpmsg - An application for passing messages in libckpool format to ckpool/ckdb
-notifier - An application designed to be run with bitcoind's -blocknotify to
+- ckpool - The main pool back end
+- ckdb - The pool's database
+- ckpmsg - An application for passing messages in libckpool format to ckpool/ckdb
+- notifier - An application designed to be run with broyaled's `-blocknotify` to
 	notify ckpool of block changes.
 
 
@@ -119,12 +126,11 @@ installation of ckpool+ckdb will be familiar with setting up postgresql and
 associated permissions to the directories where the various processes will
 communicate with each other and a web server so these will not be documented.
 
-
----
-RUNNING:
+### RUNNING
 
 ckpool supports the following options:
 
+```
 -A | --standalone
 -c CONFIG | --config CONFIG
 -d CKDB-NAME | --ckdb-name CKDB-NAME
@@ -142,76 +148,76 @@ ckpool supports the following options:
 -S CKDB-SOCKDIR | --ckdb-sockdir CKDB-SOCKDIR
 -s SOCKDIR | --sockdir SOCKDIR
 -u | --userproxy
+```
 
-
--A Standalone mode tells ckpool not to try to communicate with ckdb or log any
+`-A` Standalone mode tells ckpool not to try to communicate with ckdb or log any
 ckdb requests in the rotating ckdb logs it would otherwise store. All users
 are automatically accepted without any attempt to authorise users in any way.
 This option is explicitly enabled when built without ckdb support.
 
--c <CONFIG> tells ckpool to override its default configuration filename and
-load the specified one. If -c is not specified, ckpool looks for ckpool.conf,
+`-c <CONFIG>` tells ckpool to override its default configuration filename and
+load the specified one. If `-c` is not specified, ckpool looks for ckpool.conf,
 in proxy mode it looks for ckproxy.conf, in passthrough mode for
 ckpassthrough.conf and in redirector mode for ckredirector.conf
 
--d <CKDB-NAME> tells ckpool what the name of the ckdb process is that it should
+`-d <CKDB-NAME>` tells ckpool what the name of the ckdb process is that it should
 speak to, otherwise it will look for ckdb.
 This option does not exist when built without ckdb support.
 
--g <GROUP> will start ckpool as the group ID specified.
+`-g <GROUP>` will start ckpool as the group ID specified.
 
--H will make ckpool attempt to receive a handover from a running incidence of
+`-H` will make ckpool attempt to receive a handover from a running incidence of
 ckpool with the same name, taking its client listening socket and shutting it
 down.
 
--h displays the above help
+`-h` displays the above help
 
--k will make ckpool shut down an existing instance of ckpool with the same name,
+`-k` will make ckpool shut down an existing instance of ckpool with the same name,
 killing it if need be. Otherwise ckpool will refuse to start if an instance of
 the same name is already running.
 
--L will log per share information in the logs directory divided by block height
+`-L` will log per share information in the logs directory divided by block height
 and then workbase.
 
--l <LOGLEVEL will change the log level to that specified. Default is 5 and
+`-l <LOGLEVEL>` will change the log level to that specified. Default is 5 and
 maximum debug is level 7.
 
--N will start ckpool in passthrough node mode where it behaves like a
-passthrough but requires a locally running bitcoind and can submit blocks
+`-N` will start ckpool in passthrough node mode where it behaves like a
+passthrough but requires a locally running broyaled and can submit blocks
 itself in addition to passing the shares back to the upstream pool. It also
 monitors hashrate and requires more resources than a simple passthrough. Be
 aware that upstream pools must specify dedicated IPs/ports that accept
 incoming node requests with the nodeserver directive described below.
 
--n <NAME> will change the ckpool process name to that specified, allowing
+`-n <NAME>` will change the ckpool process name to that specified, allowing
 multiple different named instances to be running. By default the variant
 names are used: ckpool, ckproxy, ckpassthrough, ckredirector, cknode.
 
--P will start ckpool in passthrough proxy mode where it collates all incoming
+`-P` will start ckpool in passthrough proxy mode where it collates all incoming
 connections and streams all information on a single connection to an upstream
 pool specified in ckproxy.conf . Downstream users all retain their individual
 presence on the master pool. Standalone mode is implied.
 
--p will start ckpool in proxy mode where it appears to be a local pool handling
+`-p` will start ckpool in proxy mode where it appears to be a local pool handling
 clients as separate entities while presenting shares as a single user to the
 upstream pool specified. Note that the upstream pool needs to be a ckpool for
 it to scale to large hashrates. Standalone mode is Optional.
 
--R will start ckpool in a variant of passthrough mode. It is designed to be a
+`-R` will start ckpool in a variant of passthrough mode. It is designed to be a
 front end to filter out users that never contribute any shares. Once an
 accepted share from the upstream pool is detected, it will issue a redirect to
 one of the redirecturl entries in the configuration file. It will cycle over
 entries if multiple exist, but try to keep all clients from the same IP
 redirecting to the same pool.
 
--S <CKDB-SOCKDIR> tells ckpool which directory to look for the ckdb socket to
+`-S <CKDB-SOCKDIR>` tells ckpool which directory to look for the ckdb socket to
 talk to.
 This option does not exist when built without ckdb support.
 
--s <SOCKDIR> tells ckpool which directory to place its own communication
+`-s <SOCKDIR>` tells ckpool which directory to place its own communication
 sockets (/tmp by default)
 
--u Userproxy mode will start ckpool in proxy mode as per the -p option above,
+`-u` Userproxy mode will start ckpool in proxy mode as per the `-p` option above,
 but in addition it will accept username/passwords from the stratum connects
 and try to open additional connections with those credentials to the upstream
 pool specified in the configuration file and then reconnect miners to mine with
@@ -220,6 +226,7 @@ their chosen username/password to the upstream pool.
 
 ckdb takes the following options:
 
+```
 -b DBPREFIX | --dbprefix DBPREFIX
 -c CONFIG | --config CONFIG
 -d DBNAME | --dbname DBNAME
@@ -235,78 +242,80 @@ ckdb takes the following options:
 -v | --version
 -y | --confirm
 -Y CONFIRMRANGE | --confirmrange CONFIRMRANGE
+```
 
+ckpmsg and notifier support the `-n`, `-p` and `-s` options
 
-ckpmsg and notifier support the -n, -p and -s options
+### CONFIGURATION
 
----
-CONFIGURATION
-
-At least one bitcoind is mandatory in ckpool mode with the minimum requirements
+At least one broyaled is mandatory in ckpool mode with the minimum requirements
 of server, rpcuser and rpcpassword set.
 
-Ckpool takes a json encoded configuration file in ckpool.conf by default or
-ckproxy.conf in proxy or passthrough mode unless specified with -c. Sample
+Ckpool takes a json encoded configuration file in `ckpool.conf` by default or
+`ckproxy.conf` in proxy or passthrough mode unless specified with `-c`. Sample
 configurations for ckpool and ckproxy are included with the source. Entries
 after the valid json are ignored and the space there can be used for comments.
+
+Config file should be placed in the local directory of execution.
+
 The options recognised are as follows:
 
 
-"btcd" : This is an array of bitcoind(s) with the options url, auth  and pass
-which match the configured bitcoind. The optional boolean field notify tells
+`"btcd"` : This is an array of broyaled(s) with the options url, auth  and pass
+which match the configured broyaled. The optional boolean field notify tells
 ckpool this btcd is using the notifier and does not need to be polled for block
 changes. If no btcd is specified, ckpool will look for one on localhost:8332
 with the username "user" and password "pass".
 
-"proxy" : This is an array in the same format as btcd above but is used in
+`"proxy"` : This is an array in the same format as btcd above but is used in
 proxy and passthrough mode to set the upstream pool and is mandatory.
 
-"btcaddress" : This is the bitcoin address to try to generate blocks to.
+`"btcaddress"` : This is the address to try to generate blocks to. Note that this is a Bitcoin Royale address, not a bitcoin address (even though it's named `btc`).
 
-"btcsig" : This is an optional signature to put into the coinbase of mined
+`"btcsig"` : This is an optional signature to put into the coinbase of mined
 blocks.
 
-"blockpoll" : This is the frequency in milliseconds for how often to check for
+`"blockpoll"` : This is the frequency in milliseconds for how often to check for
 new network blocks and is 100 by default. It is intended to be a backup only
 for when the notifier is not set up and only polls if the "notify" field is
 not set on a btcd.
 
-"nodeserver" : This takes the same format as the serverurl array and specifies
+`"nodeserver"` : This takes the same format as the serverurl array and specifies
 additional IPs/ports to bind to that will accept incoming requests for mining
 node communications. It is recommended to selectively isolate this address
 to minimise unnecessary communications with unauthorised nodes.
 
-"nonce1length" : This is optional allowing the extranonce1 length to be chosen
+`"nonce1length"` : This is optional allowing the extranonce1 length to be chosen
 from 2 to 8. Default 4
 
-"nonce2length" : This is optional allowing the extranonce2 length to be chosen
+`"nonce2length"` : This is optional allowing the extranonce2 length to be chosen
 from 2 to 8. Default 8
 
-"update_interval" : This is the frequency that stratum updates are sent out to
+`"update_interval"` : This is the frequency that stratum updates are sent out to
 miners and is set to 30 seconds by default to help perpetuate transactions for
 the health of the bitcoin network.
 
-"version_mask" : This is a mask of which bits in the version number it is valid
+`"version_mask"` : This is a mask of which bits in the version number it is valid
 for a client to alter and is expressed as an hex string. Eg "00fff000"
 Default is "1fffe000".
 
-"serverurl" : This is the IP(s) to try to bind ckpool uniquely to, otherwise it
+`"serverurl"` : This is the IP(s) to try to bind ckpool uniquely to, otherwise it
 will attempt to bind to all interfaces in port 3333 by default in pool mode
 and 3334 in proxy mode. Multiple entries can be specified as an array by
 either IP or resolvable domain name but the executable must be able to bind to
 all of them and ports up to 1024 usually require privileged access.
 
-"redirecturl" : This is an array of URLs that ckpool will redirect active
+`"redirecturl"` : This is an array of URLs that ckpool will redirect active
 miners to in redirector mode. They must be valid resolvable URLs+ports.
 
-"mindiff" : Minimum diff that vardiff will allow miners to drop to. Default 1
+`"mindiff"` : Minimum diff that vardiff will allow miners to drop to. Default 1
 
-"startdiff" : Starting diff that new clients are given. Default 42
+`"startdiff"` : Starting diff that new clients are given. Default 42
 
-"maxdiff" : Optional maximum diff that vardiff will clamp to where zero is no
+`"maxdiff"` : Optional maximum diff that vardiff will clamp to where zero is no
 maximum.
 
-"logdir" : Which directory to store pool and client logs. Default "logs"
+`"logdir"` : Which directory to store pool and client logs. Default "logs"
 
-"maxclients" : Optional upper limit on the number of clients ckpool will
+`"maxclients"` : Optional upper limit on the number of clients ckpool will
 accept before rejecting further clients.
