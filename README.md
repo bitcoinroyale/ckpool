@@ -11,10 +11,8 @@ bitcoin mining pool, proxy, passthrough, library and database interface in c
 for Linux.
 
 CKPOOL is code provided free of charge under the GPLv3 license but its development
-is mostly paid for by commissioned funding, and the pool by default contributes
-0.5% of solved blocks in pool mode to the development team. Please consider leaving
-this contribution in the code if you are running it on a pool or contributing to the
-authors listed in AUTHORS if you use this code to aid funding further development.
+is mostly paid for by commissioned funding and by contributing to the
+authors listed in AUTHORS. If you use this code, please aid funding further development.
 
 ### LICENSE
 
