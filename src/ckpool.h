@@ -241,6 +241,8 @@ struct ckpool_instance {
 
 	/* Coinbase data */
 	char *btcaddress; // Address to mine to
+	int btcaddresses; // Number of multiple addresses to mine to
+	char **btcaddressarr; // Array of multiple addresses to mine to
 	bool script; // Address is a script address
 	bool segwit; // Address is a segwit address
 	char *btcsig; // Optional signature to add to coinbase

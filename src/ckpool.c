@@ -1359,6 +1359,32 @@ out:
 	return ret;
 }
 
+static void parse_btcaddresses(ckpool_t *ckp, const json_t *arr_val)
+{
+	int arr_size, i, total_addresses;
+
+	if (!arr_val)
+		return;
+	if (!json_is_array(arr_val)) {
+		LOGWARNING("Unable to parse btcaddress entries as an array");
+		return;
+	}
+	arr_size = json_array_size(arr_val);
+	if (!arr_size) {
+		LOGWARNING("btcaddress array empty");
+		return;
+	}
+
+	ckp->btcaddresses = arr_size;
+	ckp->btcaddressarr = ckalloc(sizeof(char *) * arr_size);
+	for (i = 0; i < arr_size; i++) {
+		json_t *val = json_array_get(arr_val, i);
+
+		if (!_json_get_string(&ckp->btcaddressarr[i], val, "btcaddress"))
+			LOGWARNING("Invalid btcaddress entry number %d", i);
+	}
+}
+
 static void parse_nodeservers(ckpool_t *ckp, const json_t *arr_val)
 {
 	int arr_size, i, j, total_urls;
@@ -1474,7 +1500,15 @@ static void parse_config(ckpool_t *ckp)
 		if (arr_size)
 			parse_btcds(ckp, arr_val, arr_size);
 	}
-	json_get_string(&ckp->btcaddress, json_conf, "btcaddress");
+
+	// support for multiple btcaddresses
+	arr_val = json_object_get(json_conf, "btcaddress");
+	if (arr_val && json_is_array(arr_val)) {
+		parse_btcaddresses(ckp, arr_val);
+	} else {
+		json_get_string(&ckp->btcaddress, json_conf, "btcaddress");
+	}
+
 	json_get_string(&ckp->btcsig, json_conf, "btcsig");
 	if (ckp->btcsig && strlen(ckp->btcsig) > 38) {
 		LOGWARNING("Signature %s too long, truncating to 38 bytes", ckp->btcsig);
@@ -1818,7 +1852,7 @@ int main(int argc, char **argv)
 			ckp.btcdpass[i] = strdup("pass");
 	}
 
-	if (!ckp.btcaddress)
+	if (!ckp.btcaddress && (!ckp.btcaddressarr || ckp.btcaddresses == 0))
 		quit(0, "BTCR address is not set (config key btcaddress)");
 	if (!ckp.blockpoll)
 		ckp.blockpoll = 100;

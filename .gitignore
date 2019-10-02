@@ -2,6 +2,8 @@
 *.bin
 *.la
 *.lo
+*.a
+*.A
 
 autom4te.cache
 .deps
@@ -37,6 +39,9 @@ mkinstalldirs
 src/ckpool
 src/ckpmsg
 src/ckdb
+src/notifier
+src/ckpool.conf
+src/logs
 ltmain.sh
 
 *.m4

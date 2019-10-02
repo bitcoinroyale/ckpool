@@ -220,6 +220,7 @@ static bool server_alive(ckpool_t *ckp, server_instance_t *si, bool pinging)
 	connsock_t *cs;
 	gbtbase_t gbt;
 	int fd;
+	int ii;
 
 	if (si->alive)
 		return true;
@@ -255,10 +256,23 @@ static bool server_alive(ckpool_t *ckp, server_instance_t *si, bool pinging)
 		goto out;
 	}
 	clear_gbtbase(&gbt);
-	if (!ckp->node && !validate_address(cs, ckp->btcaddress, &ckp->script, &ckp->segwit)) {
-		LOGWARNING("Invalid btcaddress: %s !", ckp->btcaddress);
-		goto out;
+
+	if (!ckp->node) {
+		if (ckp->btcaddress) {
+			if (!validate_address(cs, ckp->btcaddress, &ckp->script, &ckp->segwit)) {
+				LOGWARNING("Invalid btcaddress: %s !", ckp->btcaddress);
+				goto out;
+			}
+		} else {
+			for (ii = 0; ii < ckp->btcaddresses; ii++) {
+				if (!validate_address(cs, ckp->btcaddressarr[ii], &ckp->script, &ckp->segwit)) {
+					LOGWARNING("Invalid btcaddress: %s !", ckp->btcaddressarr[ii]);
+					goto out;
+				}	
+			}
+		}
 	}
+	
 	si->alive = cs->alive = ret = true;
 	LOGNOTICE("Server alive: %s:%s", cs->url, cs->port);
 out:

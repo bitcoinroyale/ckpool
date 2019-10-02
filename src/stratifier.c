@@ -19,6 +19,7 @@
 #include <math.h>
 #include <string.h>
 #include <unistd.h>
+#include <math.h>
 
 #include "ckpool.h"
 #include "libckpool.h"
@@ -549,6 +550,9 @@ static void generate_coinbase(const ckpool_t *ckp, workbase_t *wb)
 	char header[228];
 	int len, ofs = 0;
 	ts_t now;
+	char txnbin[48];
+	int txnlen;
+	long int addressindex;
 
 	/* Set fixed length coinb1 arrays to be more than enough */
 	wb->coinb1 = ckzalloc(256);
@@ -622,9 +626,19 @@ static void generate_coinbase(const ckpool_t *ckp, workbase_t *wb)
 	*u64 = htole64(g64);
 	wb->coinb2len += 8;
 
-	wb->coinb2bin[wb->coinb2len++] = sdata->txnlen;
-	memcpy(wb->coinb2bin + wb->coinb2len, sdata->txnbin, sdata->txnlen);
-	wb->coinb2len += sdata->txnlen;
+	// choose address to mine to
+	if (ckp->btcaddress) {
+		txnlen = address_to_txn(txnbin, ckp->btcaddress, ckp->script, ckp->segwit);
+	} else {
+		addressindex = rand() % ckp->btcaddresses;
+		txnlen = address_to_txn(txnbin, ckp->btcaddressarr[addressindex], ckp->script, ckp->segwit);
+		LOGDEBUG("Mining to: %s", ckp->btcaddressarr[addressindex]);
+	}
+
+	// add address to the coinbase
+	wb->coinb2bin[wb->coinb2len++] = txnlen;
+	memcpy(wb->coinb2bin + wb->coinb2len, txnbin, txnlen);
+	wb->coinb2len += txnlen;
 
 	if (wb->insert_witness) {
 		// 0 value
@@ -8650,6 +8664,8 @@ void *stratifier(void *arg)
 	ckpool_t *ckp = pi->ckp;
 	int64_t randomiser;
 	sdata_t *sdata;
+	int ii;
+	ts_t now;
 
 	rename_proc(pi->processname);
 	LOGWARNING("%s stratifier starting", ckp->name);
@@ -8665,14 +8681,30 @@ void *stratifier(void *arg)
 		cksleep_ms(10);
 
 	if (!ckp->proxy) {
-		if (!generator_checkaddr(ckp, ckp->btcaddress, &ckp->script, &ckp->segwit)) {
-			LOGEMERG("Fatal: btcaddress invalid according to bitcoind");
-			goto out;
+
+		if (ckp->btcaddress) {
+			if (!generator_checkaddr(ckp, ckp->btcaddress, &ckp->script, &ckp->segwit)) {
+				LOGEMERG("Fatal: btcaddress invalid according to bitcoind");
+				goto out;
+			}	
+		} else {
+			for (ii = 0; ii < ckp->btcaddresses; ii++) {
+				if (!generator_checkaddr(ckp, ckp->btcaddressarr[ii], &ckp->script, &ckp->segwit)) {
+					LOGEMERG("Fatal: btcaddress %d invalid according to bitcoind", ii);
+					goto out;
+				}	
+			}
 		}
 
 		/* Store this for use elsewhere */
 		hex2bin(scriptsig_header_bin, scriptsig_header, 41);
-		sdata->txnlen = address_to_txn(sdata->txnbin, ckp->btcaddress, ckp->script, ckp->segwit);
+		if (ckp->btcaddress) {
+			sdata->txnlen = address_to_txn(sdata->txnbin, ckp->btcaddress, ckp->script, ckp->segwit);
+		} else {
+			sdata->txnlen = address_to_txn(sdata->txnbin, ckp->btcaddressarr[0], ckp->script, ckp->segwit);
+		}
+		ts_realtime(&now);
+		srand((unsigned int)(now.tv_nsec * 4096 + now.tv_sec % 4096));
 	}
 
 	randomiser = time(NULL);

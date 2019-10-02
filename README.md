@@ -268,7 +268,7 @@ with the username "user" and password "pass".
 `"proxy"` : This is an array in the same format as btcd above but is used in
 proxy and passthrough mode to set the upstream pool and is mandatory.
 
-`"btcaddress"` : This is the address to try to generate blocks to. Note that this is a Bitcoin Royale address, not a bitcoin address (even though it's named `btc`).
+`"btcaddress"` : This is the address to try to generate blocks to. Note that this is a Bitcoin Royale address, not a Bitcoin address (even though the field is named `btc`). This field supports either a string for a single address or an array of strings for multiple addresses. If multiple addresses are given, one is chosen randomly for every share. The benefit of multiple addresses is increasing solo miner security and privacy in accordance with how Satoshi implemented mining in the original [Bitcoin release](https://github.com/bitcoin/bitcoin/blob/v0.1.5/main.cpp#L2361) (every block was mined to a new random key pair).
 
 `"btcsig"` : This is an optional signature to put into the coinbase of mined
 blocks.
