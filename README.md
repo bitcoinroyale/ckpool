@@ -1,6 +1,8 @@
 # CKPOOL for Bitcoin Royale
 
-This is a fork of Bitcoin's [CKPOOL](https://bitbucket.org/ckolivas/ckpool) with minor modifications to adapt it to Bitcoin Royale.
+Stratum solo mining server for BTCR. A full tutorial on how to mine Bitcoin Royale is available [here](https://github.com/bitcoinroyale/bitcoinroyale/wiki/How-to-solo-mine-Bitcoin-Royale-(BTCR)).
+
+This is a fork of Bitcoin's [CKPOOL](https://bitbucket.org/ckolivas/ckpool) with minor modifications to adapt it to Bitcoin Royale. Note that the original donation of 0.5% to the dev team was removed from this fork - this software now has zero dev costs and is 100% free to use.
 
 ---
 
