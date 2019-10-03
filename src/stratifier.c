@@ -1473,7 +1473,7 @@ retry:
 				continue;
 			if (*rule == '!')
 				rule++;
-			if (safecmp(rule, "segwit")) {
+			if (safecmp(rule, "segwit") == 0) {
 				witnessdata_check = json_string_value(json_object_get(wb->json, "default_witness_commitment"));
 				gbt_witness_data(wb, txn_array);
 				// Verify against the pre-calculated value if it exists. Skip the size/OP_RETURN bytes.
